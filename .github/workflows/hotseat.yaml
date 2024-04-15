@@ -3,7 +3,7 @@ name: Autoresolve HOTSEAT Conflicts
 on:
   push:
     branches:
-      - 'release/production'
+      - 'main'
 
 jobs:
   autoresolve_conflicts:
