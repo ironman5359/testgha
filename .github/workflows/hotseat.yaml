@@ -15,15 +15,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install GitHub CLI
-        run: |
-          curl https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor > githubcli-archive-keyring.gpg
-          mv githubcli-archive-keyring.gpg /etc/apt/trusted.gpg.d/
-          echo "deb [arch=$(dpkg --print-architecture)] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list
-          apt update && apt install gh
-        
-          
-
       - name: Get list of open PRs
         id: get_prs
         run: |
