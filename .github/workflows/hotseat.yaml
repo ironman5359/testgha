@@ -1,0 +1,56 @@
+name: Autoresolve HOTSEAT Conflicts
+
+on:
+  push:
+    branches:
+      - 'release/production'
+
+jobs:
+  autoresolve_conflicts:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install GitHub CLI
+        run: |
+          curl https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor > githubcli-archive-keyring.gpg
+          mv githubcli-archive-keyring.gpg /etc/apt/trusted.gpg.d/
+          echo "deb [arch=$(dpkg --print-architecture)] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list
+          apt update && apt install gh
+        
+          
+
+      - name: Get list of open PRs
+        id: get_prs
+        run: |
+          
+          PR_LIST=$(gh pr list --json number,headRefName --jq '.[].headRefName')
+          echo "::set-output name=pr_list::$PR_LIST"
+
+      - name: Autoresolve HOTSEAT conflicts
+        run: |
+          IFS=' ' read -r -a PR_ARRAY <<< "${{ steps.get_prs.outputs.pr_list }}"
+          for BRANCH in "${PR_ARRAY[@]}"
+          do
+            echo "Checking out $BRANCH"
+            git checkout "$BRANCH"
+            echo "Pulling $BRANCH"
+            git pull origin "$BRANCH"
+          
+            if [ -n "$(git ls-files -u | grep -v HOTSEAT)" ]; then
+              echo "Branch $BRANCH has conflicts beyond HOTSEAT. Skipping."
+              continue
+            fi
+          
+            if [ -n "$(git ls-files -u | grep HOTSEAT)" ]; then
+              echo "Resolving HOTSEAT conflict in branch $BRANCH"
+              echo "git checkout --theirs HOTSEAT"
+              echo "git add HOTSEAT"
+              echo 'git commit -m "🤖 HOTSEAT conflict autoresolved"'
+              echo "git push origin $BRANCH"
+            fi
+          done
