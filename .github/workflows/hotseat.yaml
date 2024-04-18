@@ -1,10 +1,7 @@
 name: Autoresolve HOTSEAT Conflicts
 on: 
   push:
-    branches: [ 'main', 'feature/**',  ]
-  pull_request:
-    branches: [ '**/**' ]
-
+    branches: [ '*',  ]
 
 jobs:
   autoresolve_conflicts:
