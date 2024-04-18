@@ -5,7 +5,7 @@ on:
 
 jobs:
   autoresolve_conflicts:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
