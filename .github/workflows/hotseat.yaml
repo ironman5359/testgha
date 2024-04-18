@@ -1,6 +1,6 @@
 name: Autoresolve HOTSEAT Conflicts
 on:
-  pull_request:
+  push:
     branches: [ 'main' ]
 
 
