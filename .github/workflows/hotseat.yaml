@@ -1,5 +1,4 @@
 name: Autoresolve HOTSEAT Conflicts
-
 on:
   pull_request:
     branches: [ 'main' ]
@@ -7,7 +6,7 @@ on:
 
 jobs:
   autoresolve_conflicts:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
