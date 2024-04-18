@@ -13,15 +13,16 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-        fetch-depth: 0
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Get list of open PRs
         id: get_prs
         run: |
           
           PR_LIST=$(gh pr list --json number,headRefName --jq '.[].headRefName')
-          echo "pr_list=pr_list::$PR_LIST" >>$GITHUB_OUTPUT
+          echo "::set-output name=pr_list::$PR_LIST"
 
       - name: Autoresolve HOTSEAT conflicts
         run: |
