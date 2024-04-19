@@ -27,11 +27,6 @@ jobs:
           IFS=' ' read -r -a PR_ARRAY <<< "${{ steps.get_prs.outputs.pr_list }}"
           for BRANCH in "${PR_ARRAY[@]}"
           do
-            echo "Checking out $BRANCH"
-            git checkout "$BRANCH"
-            echo "Pulling $BRANCH"
-            git pull origin "$BRANCH"
-            set -x
             echo "Starting if block" 
             echo "Doing in a temp merge to find conflicts"
             git merge $BRANCH --no-commit --no-ff >/dev/null 2>&1
