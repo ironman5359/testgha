@@ -33,18 +33,22 @@ jobs:
             git pull origin "$BRANCH"
             set -x
             echo "Starting if block" 
-            if [ -n "$(git diff --check main...$BRANCH| grep -v HOTSEAT)" ]; then
+            echo "Doing in a temp merge to find conflicts"
+            git merge $BRANCH --no-commit --no-ff >/dev/null 2>&1
+            if [ -n "$(git ls-files -u | cut -f 2 | grep -v HOTSEAT)" ]; then
               echo "Branch $BRANCH has conflicts beyond HOTSEAT. Skipping."
               git reset --hard HEAD
               continue
             fi
             echo "Ending first if block"
           
-            if [ -n "$(git diff --check main...$BRANCH | grep HOTSEAT)" ]; then
+            echo "Starting second if block"
+            if [ -n "$(git ls-files -u | cut -f 2 | grep HOTSEAT)" ]; then
               echo "Resolving HOTSEAT conflict in branch $BRANCH"
               echo "git checkout --theirs HOTSEAT"
               echo "git add HOTSEAT"
               echo 'git commit -m "🤖 HOTSEAT conflict autoresolved"'
               echo "git push origin $BRANCH"
             fi
+            echo "Ending second if block"
           done
