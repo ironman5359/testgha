@@ -51,4 +51,6 @@ jobs:
               echo "git push origin $BRANCH"
             fi
             echo "Ending second if block"
+            git status >/dev/null 2>&1
+            git merge --abort
           done
