@@ -1,12 +1,11 @@
 name: Autoresolve HOTSEAT Conflicts
-on:
-  pull_request:
+on: 
+  push:
     branches: '*'
-
 
 jobs:
   autoresolve_conflicts:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -14,14 +13,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 500 
+          fetch-depth: 0 
 
       - name: Get list of open PRs
         id: get_prs
         run: |
           
           PR_LIST=$(gh pr list --json number,headRefName --jq '.[].headRefName')
-          echo "name=pr_list::$PR_LIST" >> $GITHUB_OUTPUT
+          echo "::set-output name=pr_list::$PR_LIST"
 
       - name: Autoresolve HOTSEAT conflicts
         run: |
@@ -32,14 +31,16 @@ jobs:
             git checkout "$BRANCH"
             echo "Pulling $BRANCH"
             git pull origin "$BRANCH"
-          
-            if [ -n "$(git ls-files -u | grep -v HOTSEAT)" ]; then
+            set -x
+            echo "Starting if block" 
+            if [ -n "$(git diff --name-only --diff-filter=U | grep -v HOTSEAT)" ]; then
               echo "Branch $BRANCH has conflicts beyond HOTSEAT. Skipping."
               git reset --hard HEAD
               continue
             fi
+            echo "Ending first if block"
           
-            if [ -n "$(git ls-files -u | grep HOTSEAT)" ]; then
+            if [ -n "$(git diff --name-only --diff-filter=U | grep HOTSEAT)" ]; then
               echo "Resolving HOTSEAT conflict in branch $BRANCH"
               echo "git checkout --theirs HOTSEAT"
               echo "git add HOTSEAT"
