@@ -20,7 +20,7 @@ jobs:
         run: |
           
           PR_LIST=$(gh pr list --json number,headRefName --jq '.[].headRefName')
-          echo "name=pr_list::$PR_LIST" >> $GITHUB_OUTPUT
+          echo "::set-output name=pr_list::$PR_LIST"
 
       - name: Autoresolve HOTSEAT conflicts
         run: |
