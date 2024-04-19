@@ -35,7 +35,7 @@ jobs:
             echo "Starting if block" 
             echo "Doing in a temp merge to find conflicts"
             git merge $BRANCH --no-commit --no-ff >/dev/null 2>&1
-            if [ -n "$(grep -nrl HEAD | grep -vi "HOTSEAT")" ]; then
+            if [ -n "$(grep -nrl HEAD | grep -viE "HOTSEAT|.git")" ]; then
               echo "Branch $BRANCH has conflicts beyond HOTSEAT. Skipping."
               git reset --hard HEAD
               continue
