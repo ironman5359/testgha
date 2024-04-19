@@ -33,7 +33,7 @@ jobs:
             git pull origin "$BRANCH"
             set -x
             echo "Starting if block" 
-            if [ -n "$(git diff --name-only --diff-filter=U | grep -v HOTSEAT) ]; then
+            if [ -n "$(git diff --name-only --diff-filter=U | grep -v HOTSEAT)" ]; then
               echo "Branch $BRANCH has conflicts beyond HOTSEAT. Skipping."
               git reset --hard HEAD
               continue
