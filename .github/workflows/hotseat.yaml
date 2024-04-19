@@ -31,12 +31,14 @@ jobs:
             git checkout "$BRANCH"
             echo "Pulling $BRANCH"
             git pull origin "$BRANCH"
-          
+            set -x
+            echo "Starting if block" 
             if [ -n "$(git ls-files -u | grep -v HOTSEAT)" ]; then
               echo "Branch $BRANCH has conflicts beyond HOTSEAT. Skipping."
               git reset --hard HEAD
               continue
             fi
+            echo "Ending first if block"
           
             if [ -n "$(git ls-files -u | grep HOTSEAT)" ]; then
               echo "Resolving HOTSEAT conflict in branch $BRANCH"
