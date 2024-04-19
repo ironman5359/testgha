@@ -35,7 +35,7 @@ jobs:
             echo "Starting if block" 
             echo "Doing in a temp merge to find conflicts"
             git merge $BRANCH --no-commit --no-ff >/dev/null 2>&1
-            if [ -n "$(git ls-files -u | cut -f 2 | grep -v HOTSEAT)" ]; then
+            if [ -n "$(grep -nrl HEAD | grep -vi "HOTSEAT")" ]; then
               echo "Branch $BRANCH has conflicts beyond HOTSEAT. Skipping."
               git reset --hard HEAD
               continue
@@ -43,7 +43,7 @@ jobs:
             echo "Ending first if block"
           
             echo "Starting second if block"
-            if [ -n "$(git ls-files -u | cut -f 2 | grep HOTSEAT)" ]; then
+            if [ -n "$(grep -nrl HEAD | grep HOTSEAT)" ]; then
               echo "Resolving HOTSEAT conflict in branch $BRANCH"
               echo "git checkout --theirs HOTSEAT"
               echo "git add HOTSEAT"
