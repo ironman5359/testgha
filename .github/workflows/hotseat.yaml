@@ -32,6 +32,8 @@ jobs:
             git checkout $BRANCH
           
             # Attempt to merge main into the feature branch to check conflicts
+            git config --global user.email "robot@rayatheapp.com"
+            git config --global user.name "rayabot"
             if ! git merge --no-commit --no-ff origin/main; then
               echo "Checking for conflicts beyond HOTSEAT in $BRANCH"
               # Check specifically for conflicts that are not in HOTSEAT
