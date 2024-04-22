@@ -8,12 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CONFLICT_AUTORESOLVE: ${{ secrets.CONFLICT_AUTORESOLVE }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          credentials: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get list of open PRs
         id: get_prs
@@ -43,6 +45,7 @@ jobs:
                 continue
               fi
 
+              echo "$CONFLICT_AUTORESOLVE"
               echo "Resolving HOTSEAT conflict in branch $BRANCH"
               git checkout --theirs HOTSEAT
               git add HOTSEAT
