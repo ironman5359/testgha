@@ -21,11 +21,13 @@ jobs:
         id: get_prs
         run: |
           PR_LIST=$(gh pr list --json number,headRefName --jq '.[].headRefName' | tr '\n' ',' | sed 's/,$//')
+          echo "PR_LIST: $PR_LIST"
           echo "pr_list=$PR_LIST" >> $GITHUB_ENV
 
       - name: Autoresolve HOTSEAT conflicts
         run: |
           set -x
+          echo "PR_LIST ENV: ${{ env.pr_list }}"
           IFS=',' read -r -a PR_ARRAY <<< "${{ env.pr_list }}"
           for BRANCH in "${PR_ARRAY[@]}"
           do
