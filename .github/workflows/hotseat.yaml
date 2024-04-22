@@ -1,5 +1,5 @@
 name: Autoresolve HOTSEAT Conflicts
-on: 
+on:
   push:
     branches: '*'
 
@@ -13,38 +13,46 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
 
       - name: Get list of open PRs
         id: get_prs
         run: |
-          
           PR_LIST=$(gh pr list --json number,headRefName --jq '.[].headRefName')
           echo "::set-output name=pr_list::$PR_LIST"
 
       - name: Autoresolve HOTSEAT conflicts
         run: |
+          set -x
           IFS=' ' read -r -a PR_ARRAY <<< "${{ steps.get_prs.outputs.pr_list }}"
           for BRANCH in "${PR_ARRAY[@]}"
           do
-            echo "Checking out $BRANCH"
-            git checkout "$BRANCH"
-            echo "Pulling $BRANCH"
-            git pull origin "$BRANCH"
-            set -x
-            echo "Starting if block" 
-            if [ -n "$(git diff --check main...$BRANCH| grep -v HOTSEAT)" ]; then
-              echo "Branch $BRANCH has conflicts beyond HOTSEAT. Skipping."
-              git reset --hard HEAD
-              continue
-            fi
-            echo "Ending first if block"
+            echo "Checking conflicts for $BRANCH"
+            git fetch origin $BRANCH
+            git checkout $BRANCH
           
-            if [ -n "$(git diff --check main...$BRANCH | grep HOTSEAT)" ]; then
+            # Attempt to merge main into the feature branch to check conflicts
+            git config --global user.email "robot@rayatheapp.com"
+            git config --global user.name "rayabot"
+            if ! git merge --no-commit --no-ff origin/main; then
+              echo "Checking for conflicts beyond HOTSEAT in $BRANCH"
+              # Check specifically for conflicts that are not in HOTSEAT
+              if git diff --name-only --diff-filter=U | grep -vqE '^(HOTSEAT)$'; then
+                echo "Branch $BRANCH has conflicts beyond HOTSEAT. Skipping."
+                git merge --abort
+                continue
+              fi
+
               echo "Resolving HOTSEAT conflict in branch $BRANCH"
-              echo "git checkout --theirs HOTSEAT"
-              echo "git add HOTSEAT"
-              echo 'git commit -m "🤖 HOTSEAT conflict autoresolved"'
-              echo "git push origin $BRANCH"
+              git checkout --theirs HOTSEAT
+              git add HOTSEAT
+              git commit -m "🤖 HOTSEAT conflict autoresolved"
+              git push origin $BRANCH
+              git merge --abort
+            else
+              echo "No conflicts detected, aborting temporary merge."
+              git merge --abort
             fi
+            git checkout main
           done
+
