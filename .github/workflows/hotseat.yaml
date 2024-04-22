@@ -48,7 +48,7 @@ jobs:
 
               echo "$CONFLICT_AUTORESOLVE"
               echo "Resolving HOTSEAT conflict in branch $BRANCH"
-              git checkout --theirs HOTSEAT
+              git checkout --ours HOTSEAT
               git add HOTSEAT
               git commit -m "🤖 HOTSEAT conflict autoresolved"
               git push origin $BRANCH
