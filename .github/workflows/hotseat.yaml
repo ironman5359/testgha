@@ -33,9 +33,10 @@ jobs:
             git fetch origin $BRANCH
             git checkout $BRANCH
           
-            # Attempt to merge main into the feature branch to check conflicts
+            # Set user name and email 
             git config --global user.email "robot@rayatheapp.com"
             git config --global user.name "rayabot"
+            # Attempt to merge main into the feature branch to check conflicts
             if ! git merge --no-commit --no-ff origin/main; then
               echo "Checking for conflicts beyond HOTSEAT in $BRANCH"
               # Check specifically for conflicts that are not in HOTSEAT
@@ -53,8 +54,7 @@ jobs:
               git push origin $BRANCH
             else
               echo "No conflicts detected, aborting temporary merge."
-              git merge --abort
+              exit 0
             fi
-            git checkout main
           done
 
