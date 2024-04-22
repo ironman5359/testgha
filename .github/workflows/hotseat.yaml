@@ -20,13 +20,13 @@ jobs:
       - name: Get list of open PRs
         id: get_prs
         run: |
-          PR_LIST=$(gh pr list --json number,headRefName --jq '.[].headRefName')
+          PR_LIST=$(gh pr list --json number,headRefName --jq '.[].headRefName' | tr '\n' ',' | sed 's/,$//')
           echo "pr_list=$PR_LIST" >> $GITHUB_ENV
 
       - name: Autoresolve HOTSEAT conflicts
         run: |
           set -x
-          IFS=$'\n' read -r -a PR_ARRAY <<< "${{ steps.get_prs.outputs.pr_list }}"
+          IFS=',' read -r -a PR_ARRAY <<< "${{ steps.get_prs.outputs.pr_list }}"
           for BRANCH in "${PR_ARRAY[@]}"
           do
             echo "Checking conflicts for $BRANCH"
