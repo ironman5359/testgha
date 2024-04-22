@@ -26,7 +26,7 @@ jobs:
       - name: Autoresolve HOTSEAT conflicts
         run: |
           set -x
-          IFS=',' read -r -a PR_ARRAY <<< "${{ steps.get_prs.outputs.pr_list }}"
+          IFS=',' read -r -a PR_ARRAY <<< "${{ env.pr_list }}"
           for BRANCH in "${PR_ARRAY[@]}"
           do
             echo "Checking conflicts for $BRANCH"
