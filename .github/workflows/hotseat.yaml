@@ -51,7 +51,6 @@ jobs:
               git add HOTSEAT
               git commit -m "🤖 HOTSEAT conflict autoresolved"
               git push origin $BRANCH
-              git merge --abort
             else
               echo "No conflicts detected, aborting temporary merge."
               git merge --abort
