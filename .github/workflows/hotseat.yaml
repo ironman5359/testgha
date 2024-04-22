@@ -1,7 +1,7 @@
 name: Autoresolve HOTSEAT Conflicts
 on:
   push:
-    branches: 'origin/main'
+    branches: ['main']
 
 jobs:
   autoresolve_conflicts:
