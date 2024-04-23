@@ -1,0 +1,22 @@
+name: Production 🚀
+on:
+  push:
+    branches:
+      - main
+jobs:
+  migration:
+    name: 🏎💨 Production Migration 🏎💨
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set ENVIRONMENT to production
+        run: echo "ENVIRONMENT=production" >> $GITHUB_ENV
+      
+      - name: Assert Rules & Inject the migration bootstrap file into the proposer's migration
+        run: ./lib/assert-rules-and-prepare-runfile.sh    
