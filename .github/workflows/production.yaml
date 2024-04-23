@@ -36,6 +36,7 @@ jobs:
           # Update the GIST with the commit hash
           
       - name: Update Gist File
+        if: ${{ steps.check_commit.outputs.skip != 'true' }}
         run: |
           # Fetch the existing content this may become a problem if we hit the API too much
           existing_content=$(curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" \
