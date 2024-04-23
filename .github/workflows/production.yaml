@@ -34,7 +34,7 @@ jobs:
         run: |
           ./lib/assert-rules-and-prepare-runfile.sh
           # Update the GIST with the commit hash
-          curl -X PATCH -d '{"files": {"<FILENAME>": {"content": "'"$GITHUB_SHA"'"}}}' -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" https://api.github.com/gists/$GIST_ID
+          curl -X PATCH -d '{"files": {"run_before.txt": {"content": "'"$GITHUB_SHA"'"}}}' -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" https://api.github.com/gists/$GIST_ID
 
       
       
