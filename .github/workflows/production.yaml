@@ -8,6 +8,8 @@ jobs:
     name: 🏎💨 Production Migration 🏎💨
     environment: production
     runs-on: ubuntu-latest
+    env:
+      GIST_ID: ${{ secrets.GIST_ID }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -17,6 +19,22 @@ jobs:
       
       - name: Set ENVIRONMENT to production
         run: echo "ENVIRONMENT=production" >> $GITHUB_ENV
+        
+      - name: Check if commit has been run before
+        id: check_commit
+        run: |
+          echo "Using GIST_ID: $GIST_ID"
+          gist_content=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/gists/$GIST_ID)
+          if [[ "$gist_content" == *"$GITHUB_SHA"* ]]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Proceed if not run
+        if: ${{ steps.check_commit.outputs.skip != 'true' }}
+        run: |
+          ./lib/assert-rules-and-prepare-runfile.sh
+          # Update the GIST with the commit hash
+          curl -X PATCH -d '{"files": {"<FILENAME>": {"content": "'"$GITHUB_SHA"'"}}}' -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/gists/$GIST_ID
+
       
-      - name: Assert Rules & Inject the migration bootstrap file into the proposer's migration
-        run: ./lib/assert-rules-and-prepare-runfile.sh    
+      
