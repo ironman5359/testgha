@@ -34,7 +34,21 @@ jobs:
         run: |
           ./lib/assert-rules-and-prepare-runfile.sh
           # Update the GIST with the commit hash
-          curl -X PATCH -d '{"files": {"run_before.txt": {"content": "'"$GITHUB_SHA"'"}}}' -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" https://api.github.com/gists/$GIST_ID
-
-      
-      
+          
+      - name: Update Gist File
+        run: |
+          # Install jq if it is not available
+          sudo apt-get install jq
+          
+          # Fetch the existing content this may become a problem if we hit the API too much
+          existing_content=$(curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" \
+          "https://api.github.com/gists/$GIST_ID" | jq -r '.files["run_before.txt"].content')
+          
+          # Prepare new content
+          new_content="$existing_content"$'\n'"$GITHUB_SHA"
+          
+          # Update the Gist with new content
+          curl -X PATCH \
+               -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" \
+               -d "{\"files\": {\"run_before.txt\": {\"content\": \"$new_content\"}}}" \
+               "https://api.github.com/gists/$GIST_ID"
