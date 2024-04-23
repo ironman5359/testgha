@@ -44,7 +44,7 @@ jobs:
           # Prepare new content
           new_content="$existing_content"$'\n'"$GITHUB_SHA"
           
-          json_payload=$(jq -n \
+          json_payload=$(jq -cn \
            --arg content "$new_content" \
            '{files: {"run_before.txt": {content: $content}}}')
           
