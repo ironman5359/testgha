@@ -11,46 +11,95 @@ jobs:
     env:
       GIST_ID: ${{ secrets.GIST_ID }}
     steps:
+      - name: Set ENVIRONMENT to production
+        run: echo "ENVIRONMENT=production" >> $GITHUB_ENV
+        
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.CONFLICT_AUTORESOLVE}}
-      
-      - name: Set ENVIRONMENT to production
-        run: echo "ENVIRONMENT=production" >> $GITHUB_ENV
-        
-      - name: Check if commit has been run before
-        id: check_commit
         run: |
-          echo "Using GIST_ID: $GIST_ID"
-          gist_content=$(curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" https://api.github.com/gists/$GIST_ID)
-          if [[ "$gist_content" == *"$GITHUB_SHA"* ]]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
+          # Fetch the branch history to ensure we can find the right commit
+          git fetch --no-tags --prune --depth=50 origin +refs/heads/*:refs/remotes/origin/*
+          # Find the last commit on the branch before it was merged into main
+          # This assumes your pull request merge strategy involves a merge commit
+          SHA=$(git rev-parse HEAD^2)
+          echo $SHA >> $GITHUB_OUTPUT
+          
+
+  check_commit:
+    needs: migration
+    name: ✅ Check Commit ✅
+    environment: production
+    runs-on: ubuntu-latest
+    env:
+        SHAINPUT: ${{ needs.migration.outputs.SHA }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'ironman5359/sha-storage'
+          fetch-depth: 0
+          token: ${{ secrets.CONFLICT_AUTORESOLVE}}
+      
+      - name: Check if SHA exists
+        run: |
+          if grep -q "$SHAINPUT" shas.txt; then
+          TIMEFRAME=120
+  
+            if [ $ENVIRONMENT == 'icecream' ]; then
+              echo "Info: Skipping the 24-hour check for the icecream environment."
+              exit 0
+            else
+              commit_timestamp=$(git show -s --format=%ct "$SHAINPUT")
+              echo "Info: $commit_timestamp is the timestamp of the branch commit."
+              current_timestamp=$(date +%s)
+              echo "Info: $current_timestamp is the current timestamp."
+              age_in_seconds=$((current_timestamp - commit_timestamp))
+              echo "Info: The branch commit is $age_in_seconds seconds old."
+          
+              if (( age_in_seconds > $TIMEFRAME )); then
+                echo "❌ Error: The branch commit $SHAINPUT is older than $TIMEFRAME seconds and has already run before. Skipping the workflow."
+                echo "skip=true" >> $GITHUB_OUTPUT
+                exit 1
+              else
+                echo "ℹ️ Info: The branch commit $SHAINPUT is within the last $TIMEFRAME seconds. Proceeding with the workflow."
+              fi
+            fi
+          else
+             echo "ℹ️ Info: The branch commit $SHAINPUT has never been run before. Updating sha file and proceeding with the workflow."
+             echo "$GITHUB_SHA" >>shas.txt
+             git config user.name "rayabot"
+             git config user.email "rayabot@rayatheapp.com"
+             git add shas.txt
+             git commit -m "Add $GITHUB_SHA to shas.txt"
+             git push
+             echo "skip=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Proceed if not run
-        if: ${{ steps.check_commit.outputs.skip != 'true' }}
-        run: |
-          ./lib/assert-rules-and-prepare-runfile.sh
-          # Update the GIST with the commit hash
+      #- name: Proceed if not run
+      #  if: ${{ steps.check_commit.outputs.skip != 'true' }}
+      #  run: |
+      #    ./lib/assert-rules-and-prepare-runfile.sh
+      #    # Update the GIST with the commit hash
           
-      - name: Update Gist File
-        if: ${{ steps.check_commit.outputs.skip != 'true' }}
-        run: |
-          # Fetch the existing content this may become a problem if we hit the API too much
-          existing_content=$(curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" \
-          "https://api.github.com/gists/$GIST_ID" | jq -r '.files["run_before.txt"].content')
-          
-          # Prepare new content
-          new_content="$existing_content"$'\n'"$GITHUB_SHA"
-          
-          json_payload=$(jq -cn \
-           --arg content "$new_content" \
-           '{files: {"run_before.txt": {content: $content}}}')
-          
-          # Update the Gist with new content
-          curl -X PATCH \
-               -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" \
-               -d $json_payload \
-               "https://api.github.com/gists/$GIST_ID"
+      #- name: Update Gist File
+      #  if: ${{ steps.check_commit.outputs.skip != 'true' }}
+      #  run: |
+      #    # Fetch the existing content this may become a problem if we hit the API too much
+      #    existing_content=$(curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" \
+      #    "https://api.github.com/gists/$GIST_ID" | jq -r '.files["run_before.txt"].content')
+      #    
+      #    # Prepare new content
+      #    new_content="$existing_content"$'\n'"$GITHUB_SHA"
+      #    
+      #    json_payload=$(jq -cn \
+      #     --arg content "$new_content" \
+      #     '{files: {"run_before.txt": {content: $content}}}')
+      #    
+      #    # Update the Gist with new content
+      #    curl -X PATCH \
+      #         -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" \
+      #         -d $json_payload \
+      #         "https://api.github.com/gists/$GIST_ID"
