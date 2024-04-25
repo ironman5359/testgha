@@ -62,6 +62,7 @@ jobs:
           ENVIRONMENT: ${{ env.ENVIRONMENT }}
         run: |
           cd sha-storage
+          mkdir -p ~/.git
           if [ "$ENVIRONMENT" == "icecream" ]; then
             echo "Info: Skipping the SHA check for the icecream environment."
           else
@@ -72,11 +73,13 @@ jobs:
                 echo "skip=true" >> $GITHUB_ENV 
               else
                 echo "ℹ️ Info: The branch commit $SHA has never been run before. Updating sha file and proceeding with the workflow."
-                echo "$GITHUB_SHA" >> shas.txt
+                echo "${{ env.SHA }}" >> shas.txt
                 git config user.name "rayabot"
                 git config user.email "rayabot@rayatheapp.com"
                 git config --global credential.helper store
                 echo "https://${{ secrets.CONFLICT_AUTORESOLVE }}@github.com/ironman5359/sha-storage.git" > ~/.git/credentials
+                echo "S1"
+                git config --list
                 git add shas.txt
                 git commit -m "Add $GITHUB_SHA to shas.txt"
                 git push
@@ -85,13 +88,15 @@ jobs:
             else
               echo "ℹ️ Info: The branch commit $SHA has never been run before even though it's over the time limit of ${{ env.TIMEFRAME }}."
               echo "Updating sha file and proceeding with the workflow."
-              echo "$GITHUB_SHA" >> shas.txt
+              echo "${{ env.SHA }}" >> shas.txt
               git config user.name "rayabot"
               git config user.email "rayabot@rayatheapp.com"
               git config --global credential.helper store
               echo "https://${{ secrets.CONFLICT_AUTORESOLVE }}@github.com/ironman5359/sha-storage.git" > ~/.git/credentials
+              echo "S2"
+              git config --list
               git add shas.txt
-              git commit -m "Add $GITHUB_SHA to shas.txt"
+              git commit -m "Add ${{ env.SHA }} to shas.txt"
               git push
               echo "skip=false" >> $GITHUB_ENV
             fi
