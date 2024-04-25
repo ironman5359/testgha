@@ -1,3 +1,4 @@
+name: Advanced Pipeline Example
 on:
   push:
     branches:
