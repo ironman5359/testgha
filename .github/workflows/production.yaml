@@ -8,10 +8,9 @@ jobs:
   branch_restriction:
     name: 🚦 Branch Restriction 🚦
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
     steps:
-      - name: Set ENVIRONMENT to production
-        run: echo "ENVIRONMENT=production" >> $GITHUB_ENV
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -58,8 +57,7 @@ jobs:
       - name: Check if SHA exists
         id: sha_exists
         env:
-          SHA_INPUT: ${{ steps.check_commit_age.outputs.sha }}
-          AGE_SKIP: ${{ steps.check_commit_age.outputs.age_skip }}
+          AGE_SKIP: ${{ env.age_skip }}
           ENVIRONMENT: ${{ env.ENVIRONMENT }}
         run: |
           cd sha-storage
@@ -67,13 +65,12 @@ jobs:
             echo "Info: Skipping the SHA check for the icecream environment."
           else
             if [ $AGE_SKIP == 'true' ]; then
-              SHA_INPUT=${{ steps.check_commit_age.outputs.sha }}
-              if grep -q "$SHA_INPUT" shas.txt; then
-                echo "❌ Error: The branch commit $SHA_INPUT has already been run before and it's over the $TIMELIMIT limit. 
+              if grep -q "${{ env.SHA }}" shas.txt; then
+                echo "❌ Error: The branch commit ${{ env.SHA }} has already been run before and it's over the ${{ env.TIMELIMIT }} limit. 
                 echo "Skipping the workflow."
                 echo "skip=true" >> $GITHUB_OUTPUT
               else
-                echo "ℹ️ Info: The branch commit $SHA_INPUT has never been run before. Updating sha file and proceeding with the workflow."
+                echo "ℹ️ Info: The branch commit ${{ env.SHA }} has never been run before. Updating sha file and proceeding with the workflow."
                  echo "$GITHUB_SHA" >>shas.txt
                  git config user.name "rayabot"
                  git config user.email "rayabot@rayatheapp.com"
@@ -84,7 +81,7 @@ jobs:
               fi      
             fi
           else 
-             echo "ℹ️ Info: The branch commit $SHA_INPUT has never been run before even though it's over the time limit of $TIMELIMIT." 
+             echo "ℹ️ Info: The branch commit ${{ env.SHA }} has never been run before even though it's over the time limit of ${{ env.TIMELIMIT }}." 
              echo "Updating sha file and proceeding with the workflow."
              echo "$GITHUB_SHA" >>shas.txt
              git config user.name "rayabot"
