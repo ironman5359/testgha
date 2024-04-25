@@ -9,6 +9,13 @@ on:
     branches:
       - main
       - develop
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+
 
 jobs:
   build:
@@ -37,7 +44,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/main'
+    if: github.event.inputs.environment == 'production'
     steps:
       - name: Deploy to Production
         run: echo "Deploying to production..."
@@ -45,7 +52,7 @@ jobs:
   deploy-staging:
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/develop'
+    if: github.event.inputs.environment == 'staging'
     steps:
       - name: Deploy to Staging
         run: echo "Deploying to staging..."
