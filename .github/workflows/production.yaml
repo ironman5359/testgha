@@ -21,29 +21,31 @@ jobs:
 
       - name: Check the commit age
         id: check_commit_age
+        env:
+          ENVIRONMENT: ${{ env.ENVIRONMENT }}
+          TIMEFRAME: 120
         run: |
           cd testgha
           # Fetch the branch history to ensure we can find the right commit
           git fetch --no-tags --prune --depth=50 origin +refs/heads/*:refs/remotes/origin/*
           # Find the last commit on the branch before it was merged into main
           # This assumes your pull request merge strategy involves a merge commit
-          if [ $ENVIRONMENT == 'icecream' ]; then
+          if [ ${{ env.ENVIRONMENT }} == 'icecream' ]; then
             echo "Info: Skipping the 24-hour check for the icecream environment."
             continue
           fi
-          TIMEFRAME=120
           SHA=$(git rev-parse HEAD^2)
-          echo $SHA >> $GITHUB_OUTPUT
+          echo "SHA=$SHA" >> $GITHUB_ENV
           commit_timestamp=$(git show -s --format=%ct "$SHA")
           current_timestamp=$(date +%s)
           age_in_seconds=$((current_timestamp - commit_timestamp))
           
-          if (( age_in_seconds > $TIMEFRAME )); then
-            echo "⚠️ Warning: The branch commit $SHA is older than $TIMEFRAME seconds and has already run before. Skipping the workflow."
-            echo "age_skip=true" >> $GITHUB_OUTPUT
+          if (( age_in_seconds > ${{ env.TIMEFRAME }} )); then
+            echo "⚠️ Warning: The branch commit ${{ env.SHA }} is older than ${{ env.TIMEFRAME }} seconds and has already run before. Skipping the workflow."
+            echo "age_skip=true" >> $GITHUB_ENV
           else
-            echo "ℹ️ Info: The branch commit $SHA is within the last $TIMEFRAME seconds. Proceeding with the workflow."
-            echo "age_skip=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ Info: The branch commit ${{ env.SHA }} is within the last ${{ env.TIMEFRAME }} seconds. Proceeding with the workflow."
+            echo "age_skip=false" >> $GITHUB_ENV
           fi
       - name: Checkout 'ironman5359/sha-storage' repository
         uses: actions/checkout@v4
@@ -58,9 +60,10 @@ jobs:
         env:
           SHA_INPUT: ${{ steps.check_commit_age.outputs.sha }}
           AGE_SKIP: ${{ steps.check_commit_age.outputs.age_skip }}
+          ENVIRONMENT: ${{ env.ENVIRONMENT }}
         run: |
           cd sha-storage
-          if [ $ENVIRONMENT == 'icecream' ]; then
+          if [ ${{ env.ENVIRONMENT }} == 'icecream' ]; then
             echo "Info: Skipping the SHA check for the icecream environment."
           else
             if [ $AGE_SKIP == 'true' ]; then
