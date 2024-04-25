@@ -46,13 +46,6 @@ jobs:
             echo "ℹ️ Info: The branch commit ${{ env.SHA }} is within the last ${{ env.TIMEFRAME }} seconds. Proceeding with the workflow."
             echo "age_skip=false" >> $GITHUB_ENV
           fi
-      - name: Checkout 'ironman5359/sha-storage' repository
-        uses: actions/checkout@v4
-        with:
-          repository: 'ironman5359/sha-storage'
-          fetch-depth: 0
-          token: ${{ secrets.CONFLICT_AUTORESOLVE}}
-          path: 'sha-storage'
 
       - name: Check if SHA exists
         id: sha_exists
@@ -60,7 +53,6 @@ jobs:
           AGE_SKIP: ${{ env.age_skip }}
           ENVIRONMENT: ${{ env.ENVIRONMENT }}
         run: |
-          cd sha-storage
           if [ "$ENVIRONMENT" == "icecream" ]; then
             echo "Info: Skipping the SHA check for the icecream environment."
           else
@@ -87,6 +79,8 @@ jobs:
               echo "$GITHUB_SHA" >> shas.txt
               git config user.name "rayabot"
               git config user.email "rayabot@rayatheapp.com"
+              git config --global credential.helper store
+              echo "https://${{ secrets.CONFLICT_AUTORESOLVE }}@github.com/ironman5359/sha-storage.git" > ~/.git/credentials
               git add shas.txt
               git commit -m "Add $GITHUB_SHA to shas.txt"
               git push
