@@ -1,0 +1,41 @@
+name: Multi-Part Workflow Example
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build the project
+        run: echo "Building the project..."
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run tests
+        run: echo "Running tests..."
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Deploy the project
+        run: echo "Deploying the project..."
+
+  notify:
+    runs-on: ubuntu-latest
+    if: always()  # This ensures that notification runs whether previous jobs fail or succeed.
+    needs: [build, test, deploy]
+    steps:
+      - name: Send notification
+        run: echo "Sending notification..."
