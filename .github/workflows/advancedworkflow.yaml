@@ -1,52 +1,75 @@
-name: Advanced Pipeline Example
-
 on:
   push:
     branches:
       - main
-
-jobs:
+jobs:   
   build:
     runs-on: ubuntu-latest
+    outputs:
+      build_status: ${{ steps.build_step.outcome }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build the project
+        id: build_step
         run: echo "Building the project..."
 
   test1:
     runs-on: ubuntu-latest
     needs: build
+    outputs:
+      test1_result: ${{ steps.test_step.outcome }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Run test suite 1
-        run: echo "Running test suite 1..."
+        id: test_step
+        run: |
+          echo "Running test suite 1..."
+          # Simulate a test command
+          exit 0
 
   test2:
     runs-on: ubuntu-latest
     needs: build
+    outputs:
+      test2_result: ${{ steps.test_step.outcome }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Run test suite 2
-        run: echo "Running test suite 2..."
+        id: test_step
+        run: |
+          echo "Running test suite 2..."
+          # Simulate a test command that fails
+          exit 1
 
   test3:
     runs-on: ubuntu-latest
     needs: build
+    outputs:
+      test3_result: ${{ steps.test_step.outcome }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Run test suite 3
-        run: echo "Running test suite 3..."
+        id: test_step
+        run: |
+          echo "Running test suite 3..."
+          # Simulate a test command
+          exit 0
 
   deploy:
     runs-on: ubuntu-latest
     needs: [test1, test2, test3]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Check test results
+        run: |
+          if [ "${{ needs.test1.outputs.test1_result }}" != "success" ] || 
+             [ "${{ needs.test2.outputs.test2_result }}" != "success" ] ||
+             [ "${{ needs.test3.outputs.test3_result }}" != "success" ]; then
+            echo "One or more test suites failed."
+            exit 1
+          fi
       - name: Deploy the project
         run: echo "Deploying the project..."
-
