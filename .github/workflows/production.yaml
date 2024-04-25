@@ -22,6 +22,7 @@ jobs:
       - name: Check the commit age
         id: check_commit_age
         run: |
+          cd testgha
           # Fetch the branch history to ensure we can find the right commit
           git fetch --no-tags --prune --depth=50 origin +refs/heads/*:refs/remotes/origin/*
           # Find the last commit on the branch before it was merged into main
@@ -56,6 +57,7 @@ jobs:
         id: sha_exists
         if: ${{ steps.check_commit_age.outputs.age_skip != 'true' }}
         run: |
+          cd sha-storage
           if [ $ENVIRONMENT == 'icecream' ]; then
             echo "Info: Skipping the SHA check for the icecream environment."
           else
