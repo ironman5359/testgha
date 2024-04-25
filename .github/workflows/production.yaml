@@ -66,7 +66,7 @@ jobs:
           else
             if [ "$AGE_SKIP" == "true" ]; then
               if grep -q "$SHA" shas.txt; then
-                echo "❌ Error: The branch commit $SHA has already been run before and it's over the $TIMELIMIT limit."
+                echo "❌ Error: The branch commit $SHA has already been run before and it's over the ${{ env.TIMEFRAME }} limit."
                 echo "Skipping the workflow."
                 echo "skip=true" >> $GITHUB_ENV 
               else
@@ -74,13 +74,15 @@ jobs:
                 echo "$GITHUB_SHA" >> shas.txt
                 git config user.name "rayabot"
                 git config user.email "rayabot@rayatheapp.com"
+                git config --global credential.helper store
+                echo "https://${{ secrets.CONFLICT_AUTORESOLVE }}@github.com/ironman5359/sha-storage.git" > ~/.git/credentials
                 git add shas.txt
                 git commit -m "Add $GITHUB_SHA to shas.txt"
                 git push
                 echo "skip=false" >> $GITHUB_ENV
               fi
             else
-              echo "ℹ️ Info: The branch commit $SHA has never been run before even though it's over the time limit of $TIMELIMIT."
+              echo "ℹ️ Info: The branch commit $SHA has never been run before even though it's over the time limit of ${{ env.TIMEFRAME }}."
               echo "Updating sha file and proceeding with the workflow."
               echo "$GITHUB_SHA" >> shas.txt
               git config user.name "rayabot"
