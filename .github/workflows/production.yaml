@@ -34,7 +34,7 @@ jobs:
           current_timestamp=$(date +%s)
           age_in_seconds=$((current_timestamp - commit_timestamp))
           
-          if grep -q "$SHA" .github/workflows/shas.txt; then
+          if grep -q "$SHA" lib/shas.txt; then
             if (( age_in_seconds > ${{ env.TIMEFRAME }} )); then
               echo "❌ Error: The branch commit $SHA has already been run before and it's over the ${{ env.TIMEFRAME }} limit."
               echo "skip=true" >> $GITHUB_ENV
@@ -44,10 +44,10 @@ jobs:
             fi
           else
             echo "ℹ️ Info: The branch commit $SHA has never been run before. Updating sha file and proceeding with the workflow."
-            echo "$SHA" >>.github/workflows/shas.txt
+            echo "$SHA" >>lib/shas.txt
             git config user.name "rayabot"
             git config user.email "rayabot@rayatheapp.com"
-            git add .github/workflows/shas.txt
+            git add lib/shas.txt
             git commit -m "[🤖] Adding $SHA to shas.txt"
             git push origin 
             echo "skip=false" >> $GITHUB_ENV
