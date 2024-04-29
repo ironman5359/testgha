@@ -47,20 +47,19 @@ jobs:
           
           if [[ "$SHA" == "DIRECTTOMAIN" ]]; then
             echo "✅ The branch was merged directly into main. Skipping the workflow."
-            echo "skip=true" >> $GITHUB_ENV
-            exit 0
+            echo "skip=true" >> $GITHUB_OUTPUT
           else
             if [[ "$gist_content" == *"$SHA"* ]]; then
               if (( age_in_seconds > ${{ env.TIMEFRAME }} )); then
                 echo "❌ Error: The branch commit $SHA has already been run before and it's over the ${{ env.TIMEFRAME }} limit."
-                echo "skip=true" >> $GITHUB_ENV
+                echo "skip=true" >> $GITHUB_OUTPUT
               else
                 echo "ℹ️ Info: The branch commit $SHA is within the last ${{ env.TIMEFRAME }} seconds. Proceeding with the workflow."
-                echo "skip=false" >> $GITHUB_ENV
+                echo "skip=false" >> $GITHUB_OUTPUT
               fi
             else
               echo "ℹ️ Info: The branch commit $SHA has never been run before. Updating sha file and proceeding with the workflow."
-              echo "skip=false" >> $GITHUB_ENV
+              echo "skip=false" >> $GITHUB_OUTPUT
             fi
           fi
           
