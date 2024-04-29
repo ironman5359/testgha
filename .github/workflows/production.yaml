@@ -26,7 +26,7 @@ jobs:
         run: |
           set -x
           # Get the existing commits from gist
-          gist_content=$(curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" https://api.github.com/gists/$GIST_ID | jq -r '.files["run_before.txt"].content')
+          gist_content=$(curl -s -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" https://api.github.com/gists/$GIST_ID | jq -r '.files["run_before.txt"].content')
           
           # Fetch the branch history to ensure we can find the right commit
           git fetch --no-tags --prune --depth=50 origin +refs/heads/*:refs/remotes/origin/* || { echo "Get fetch failed"; exit 128; }
@@ -67,7 +67,7 @@ jobs:
         if: ${{ steps.check_commit_eligibility.outputs.skip == 'false' }}
         run: |
           # Install jq
-          sudo apt-get update && sudo apt-get install -y jq
+          sudo apt-get update && sudo apt-get install -y jq >/dev/null 2>&1
           
           # Fetch the existing content from gist
           existing_content=$(curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" \
@@ -80,11 +80,7 @@ jobs:
           json_payload=$(jq -cn --arg content "$new_content" '{files: {"run_before.txt": {content: $content}}}')
           
           # Update the Gist with the new content
-          curl -X PATCH \
-               -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" \
-               -H "Content-Type: application/json" \
-               -d "$json_payload" \
-               "https://api.github.com/gists/$GIST_ID"
+          curl -X PATCH -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" -H "Content-Type: application/json" -d "$json_payload" "https://api.github.com/gists/$GIST_ID"
   
   migration:
     name: 🏎💨 Production Migration 🏎💨
