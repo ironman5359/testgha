@@ -74,12 +74,10 @@ jobs:
           "https://api.github.com/gists/$GIST_ID" | jq -r '.files["run_before.txt"].content')
           
           # Append new content
-          new_content="$existing_content"$'\n'"$GITHUB_SHA"
+          new_content="$existing_content"$'\n'"$SHA"
           
           # Prepare the JSON payload using jq
-          json_payload=$(jq -n \
-                         --arg content "$new_content" \
-                         '{files: {"run_before.txt": {content: $content}}}')
+          json_payload=$(jq -n --arg content "$new_content" '{files: {"run_before.txt": {content: $content}}}')
           
           # Update the Gist with the new content
           curl -X PATCH \
