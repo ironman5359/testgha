@@ -76,8 +76,8 @@ jobs:
           # Append new content
           new_content="$existing_content"$'\n'"$SHA"
           
-          # Prepare the JSON payload using jq
-          json_payload=$(jq -n --arg content "$new_content" '{files: {"run_before.txt": {content: $content}}}')
+          # Prepare the JSON payload using jq, make sure to use -c to output as a single line
+          json_payload=$(jq -cn --arg content "$new_content" '{files: {"run_before.txt": {content: $content}}}')
           
           # Update the Gist with the new content
           curl -X PATCH \
