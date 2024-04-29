@@ -39,16 +39,16 @@ jobs:
               echo "❌ Error: The branch commit $SHA has already been run before and it's over the ${{ env.TIMEFRAME }} limit."
               echo "skip=true" >> $GITHUB_ENV
             else
-              echo "ℹ️ Info: The branch commit ${{ env.SHA }} is within the last ${{ env.TIMEFRAME }} seconds. Proceeding with the workflow."
+              echo "ℹ️ Info: The branch commit $SHA is within the last ${{ env.TIMEFRAME }} seconds. Proceeding with the workflow."
               echo "skip=false" >> $GITHUB_ENV
             fi
           else
             echo "ℹ️ Info: The branch commit $SHA has never been run before. Updating sha file and proceeding with the workflow."
-            echo "${{ env.SHA }}" >>.github/workflows/shas.txt
+            echo "$SHA" >>.github/workflows/shas.txt
             git config user.name "rayabot"
             git config user.email "rayabot@rayatheapp.com"
             git add .github/workflows/shas.txt
-            git commit -m "[🤖] Adding ${{ env.SHA }} to shas.txt"
+            git commit -m "[🤖] Adding $SHA to shas.txt"
             git push origin 
             echo "skip=false" >> $GITHUB_ENV
           fi
