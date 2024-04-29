@@ -25,7 +25,7 @@ jobs:
           GIST_ID: ${{ secrets.GIST_ID }}
         run: |
           # Get the existing commits from gist
-          curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" https://api.github.com/gists/$GIST_ID
+          curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" https://api.github.com/gists/$GIST_ID | jq -r '.files["run_before.txt"].content'
           gist_content=$(curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" https://api.github.com/gists/$GIST_ID)
           
           # Fetch the branch history to ensure we can find the right commit
