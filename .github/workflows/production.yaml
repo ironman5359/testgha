@@ -47,6 +47,7 @@ jobs:
           
           if [[ "$SHA" == "DIRECTTOMAIN" ]]; then
             echo "✅ The branch was merged directly into main. Skipping the workflow."
+            echo "skip=true" >> $GITHUB_ENV
             exit 0
           else
             if [[ "$gist_content" == *"$SHA"* ]]; then
@@ -64,7 +65,7 @@ jobs:
           fi
           
       - name: Update Gist File
-        if: ${{ steps.check_commit_eligibility.outputs.skip != 'false' }}
+        if: ${{ steps.check_commit_eligibility.outputs.skip != 'true' }}
         run: |
           # Install jq
           sudo apt-get update && sudo apt-get install -y jq
