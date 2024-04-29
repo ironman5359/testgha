@@ -9,7 +9,7 @@ jobs:
     name: 🚦 Branch Restriction 🚦
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'icecream' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.CONFLICT_AUTORESOLVE }}
 
-      - name: Check the commit age
+      - name: Check commit eligibility
         id: check_commit_age
         env:
           ENVIRONMENT: ${{ env.ENVIRONMENT }}
@@ -35,16 +35,15 @@ jobs:
           age_in_seconds=$((current_timestamp - commit_timestamp))
           
           if grep -q "$SHA" .github/workflows/shas.txt; then
-          if (( age_in_seconds > ${{ env.TIMEFRAME }} )); then
-          echo "❌ Error: The branch commit $SHA has already been run before and it's over the ${{ env.TIMEFRAME }} limit."
-            echo "skip=true" >> $GITHUB_ENV
-          echo "⚠️ Warning: The branch commit ${{ env.SHA }} is older than ${{ env.TIMEFRAME }} seconds."
+            if (( age_in_seconds > ${{ env.TIMEFRAME }} )); then
+              echo "❌ Error: The branch commit $SHA has already been run before and it's over the ${{ env.TIMEFRAME }} limit."
+              echo "skip=true" >> $GITHUB_ENV
             else
-          echo "ℹ️ Info: The branch commit ${{ env.SHA }} is within the last ${{ env.TIMEFRAME }} seconds. Proceeding with the workflow."
-            echo "skip=false" >> $GITHUB_ENV
+              echo "ℹ️ Info: The branch commit ${{ env.SHA }} is within the last ${{ env.TIMEFRAME }} seconds. Proceeding with the workflow."
+              echo "skip=false" >> $GITHUB_ENV
             fi
-            else
-          echo "ℹ️ Info: The branch commit $SHA has never been run before. Updating sha file and proceeding with the workflow."
+          else
+            echo "ℹ️ Info: The branch commit $SHA has never been run before. Updating sha file and proceeding with the workflow."
             echo "${{ env.SHA }}" >>.github/workflows/shas.txt
             git config user.name "rayabot"
             git config user.email "rayabot@rayatheapp.com"
@@ -52,7 +51,7 @@ jobs:
             git commit -m "[🤖] Adding ${{ env.SHA }} to shas.txt"
             git push
             echo "skip=false" >> $GITHUB_ENV
-            fi
+          fi
   
   migration:
     name: 🏎💨 Production Migration 🏎💨
