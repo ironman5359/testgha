@@ -24,6 +24,7 @@ jobs:
           TIMEFRAME: 120
           GIST_ID: ${{ secrets.GIST_ID }}
         run: |
+          set -x
           # Get the existing commits from gist
           gist_content=$(curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" https://api.github.com/gists/$GIST_ID | jq -r '.files["run_before.txt"].content')
           
