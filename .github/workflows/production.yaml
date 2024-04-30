@@ -28,7 +28,7 @@ jobs:
           # Get the existing commits from gist
           raw_url=$(curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" "https://api.github.com/gists/$GIST_ID" | jq -r '.files["run_before.txt"].raw_url')
           gist_content=$(curl -s "$raw_url")
-          echo "gist_content=$gist_content" >> $GITHUB_ENV
+          echo "gist_content=$gist_content" >> $GITHUB_OUTPUT
           
           # Fetch the branch history to ensure we can find the right commit
           git fetch --no-tags --prune --depth=50 origin +refs/heads/*:refs/remotes/origin/* || { echo "Get fetch failed"; exit 128; }
@@ -76,7 +76,7 @@ jobs:
           #sudo apt-get update && sudo apt-get install -y jq >/dev/null 2>&1
           
           # Append new content
-          new_content="$gist_content"$'\n'"$SHA_TO_ADD"
+          new_content="${{ steps.commit_eligibility.outputs.gist_content }}"$'\n'"$SHA_TO_ADD"
           
           # Prepare the JSON payload using jq, make sure to use -c to output as a single line
           json_payload=$(jq -cn --arg content "$new_content" '{files: {"run_before.txt": {content: $content}}}')
