@@ -26,13 +26,14 @@ jobs:
         run: |
           set -x
           # Get the existing commits from gist
-          gist_content=$(curl -s -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" https://api.github.com/gists/$GIST_ID | jq -r '.files["run_before.txt"].content')
+          raw_url=$(curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" "https://api.github.com/gists/$GIST_ID" | jq -r '.files["run_before.txt"].raw_url')
+          gist_content=$(curl -s -H "$raw_url")
           
           # Fetch the branch history to ensure we can find the right commit
           git fetch --no-tags --prune --depth=50 origin +refs/heads/*:refs/remotes/origin/* || { echo "Get fetch failed"; exit 128; }
           
           # Find the last commit on the branch before it was merged into main
-          # This assumes your pull request merge strategy involves a merge commit
+          # Also determine if we're dealing with a direct merge into main
           
           parent_count=$(git rev-list --parents -n 1 HEAD | wc -w)
           if [ "$parent_count" -le 2 ]; then
@@ -45,6 +46,7 @@ jobs:
             age_in_seconds=$((current_timestamp - commit_timestamp))
           fi
           
+          # If the branch was merged directly into main, skip the workflow 
           if [[ "$SHA" == "DIRECTTOMAIN" ]]; then
             echo "✅ The branch was merged directly into main. Skipping the workflow."
             echo "skip=true" >> $GITHUB_OUTPUT
