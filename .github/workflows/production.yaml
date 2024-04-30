@@ -27,7 +27,7 @@ jobs:
           set -x
           # Get the existing commits from gist
           raw_url=$(curl -H "Authorization: token ${{ secrets.CONFLICT_AUTORESOLVE }}" "https://api.github.com/gists/$GIST_ID" | jq -r '.files["run_before.txt"].raw_url')
-          gist_content=$(curl -s -H "$raw_url")
+          gist_content=$(curl -s "$raw_url")
           
           # Fetch the branch history to ensure we can find the right commit
           git fetch --no-tags --prune --depth=50 origin +refs/heads/*:refs/remotes/origin/* || { echo "Get fetch failed"; exit 128; }
