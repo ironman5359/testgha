@@ -1,2 +1,0 @@
-# A list of sha's whos migrations have run before.
-99258c896d4eca2b84e8f7c6b0181ec40a14397c
