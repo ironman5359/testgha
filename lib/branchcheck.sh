@@ -66,21 +66,19 @@ main() {
     echo "✅ The branch was merged directly into main branch. Skipping the workflow."
     echo "skip=true" >>"$GITHUB_OUTPUT"
   else
-    for i in $(< lib/restricted.txt); do
-      if [[ "$i" == *"$SHA_TO_ADD"* ]]; then
-        if ((age_in_seconds > $TIMEFRAME)); then
-          echo "❌ Error: The branch commit $SHA_TO_ADD has already been run before and it's over the $TIMEFRAME limit."
-          echo "skip=true" >>"$GITHUB_OUTPUT"
-        else
-          echo "ℹ️ Info: The branch commit $SHA_TO_ADD is within the last $TIMEFRAME seconds. Proceeding with the workflow."
-          echo "skip=false" >>"$GITHUB_OUTPUT"
-        fi
+    if grep "${SHA_TO_ADD}" restricted.txt >/dev/null 2>&1; then
+      if ((age_in_seconds > $TIMEFRAME)); then
+        echo "❌ Error: The branch commit $SHA_TO_ADD has already been run before and it's over the $TIMEFRAME limit."
+        echo "skip=true" >>"$GITHUB_OUTPUT"
       else
-        echo "ℹ️ Info: The branch commit $SHA_TO_ADD has never been run before. Updating sha file and proceeding with the workflow."
-        update_file "$SHA_TO_ADD" "/${ENVIRONMENT}-migrations/24Hour/restricted.txt"
+        echo "ℹ️ Info: The branch commit $SHA_TO_ADD is within the last $TIMEFRAME seconds. Proceeding with the workflow."
         echo "skip=false" >>"$GITHUB_OUTPUT"
       fi
-    done
+    else
+      echo "ℹ️ Info: The branch commit $SHA_TO_ADD has never been run before. Updating sha file and proceeding with the workflow."
+      update_file "$SHA_TO_ADD" "/${ENVIRONMENT}-migrations/24Hour/restricted.txt"
+      echo "skip=false" >>"$GITHUB_OUTPUT"
+    fi
   fi
 }
 
