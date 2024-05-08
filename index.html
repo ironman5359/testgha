@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open AWS Console</title>
+</head>
+<body>
+
+<a href="#" id="openAWSConsole">Open AWS Console</a>
+<br />
+<a href="ext+container:name=MyContainer&url=https://mozilla.org&signature=ea7214f675398e93764ba44504070221633b0d5dce6c4263715f1cca89ab5f86">Mozilla.Org in MyContainer</a>
+
+<script>
+document.getElementById('openAWSConsole').addEventListener('click', function(event) {
+  event.preventDefault();
+  openAWSCustomURI();
+});
+
+function openAWSCustomURI() {
+  // Replace 'aws://' with your custom URI scheme
+  var url = 'aws://console.aws.amazon.com/';
+  window.location.href = url;
+}
+</script>
+
+</body>
+</html>
