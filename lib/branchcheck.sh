@@ -18,7 +18,7 @@ configure_aws_cli() {
 
 download_file() {
   local filepath=$1
-  aws s3 cp s3:/"$filepath" .
+  aws s3 cp "$filepath" .
 }
 
 update_file() {
