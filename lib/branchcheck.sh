@@ -66,7 +66,7 @@ main() {
     echo "✅ The branch was merged directly into main branch. Skipping the workflow."
     echo "skip=true" >>"$GITHUB_OUTPUT"
   else
-    for i in $(<restricted.txt); do
+    for i in $(< lib/restricted.txt); do
       if [[ "$i" == *"$SHA_TO_ADD"* ]]; then
         if ((age_in_seconds > $TIMEFRAME)); then
           echo "❌ Error: The branch commit $SHA_TO_ADD has already been run before and it's over the $TIMEFRAME limit."
