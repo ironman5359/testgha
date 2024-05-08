@@ -20,7 +20,7 @@ jobs:
       - name: Check commit eligibility
         id: check_commit_eligibility
         env:
-          ENVIRONMENT: ${{ env.ENVIRONMENT }}
+          ENVIRONMENT: "icecream"
           TIMEFRAME: 120
           GIST_ID: ${{ secrets.GIST_ID }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
