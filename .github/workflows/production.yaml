@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'production' || 'icecream' }}
+    outputs:
+        skip: ${{ steps.check_commit_eligibility.outputs.skip }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -49,6 +51,6 @@ jobs:
           
       - name: Showtime!
         id: showtime
-        if: ${{ needs.branch_restriction.outputs.skip != 'true' }}
+        if: ${{ needs.branch_restriction.outputs.skip != 'false' }}
         run: |
           echo "🚀 Running the migration script..."

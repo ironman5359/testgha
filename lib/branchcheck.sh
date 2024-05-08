@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+# set -x
 # set -e and set -o pipefail are set by github actions and therefore not needed here
 
 # GITHUB_ENV, GITHUB_OUTPUT and TIMEFRAME are environment variables set by GitHub Actions
@@ -26,7 +26,7 @@ update_file() {
   local filepath=$2
   echo "Updating the restricted.txt file... adding ${sha_to_add}."
   echo "$sha_to_add" >>restricted.txt
-  aws s3 cp restricted.txt s3:/"$filepath"
+  aws s3 cp restricted.txt "$filepath"
 }
 
 
@@ -40,7 +40,7 @@ main() {
 
   # Download the restricted.txt file from S3
   configure_aws_cli
-  download_file "/${ENVIRONMENT}-migrations/24Hour/restricted.txt"
+  download_file "s3://${ENVIRONMENT}-migrations/24Hour/restricted.txt"
 
   # Fetch the branch history to ensure we can find the right commit
   git fetch --no-tags --prune --depth=50 origin +refs/heads/*:refs/remotes/origin/* || {
@@ -76,7 +76,7 @@ main() {
       fi
     else
       echo "ℹ️ Info: The branch commit $SHA_TO_ADD has never been run before. Updating sha file and proceeding with the workflow."
-      update_file "$SHA_TO_ADD" "/${ENVIRONMENT}-migrations/24Hour/restricted.txt"
+      update_file "$SHA_TO_ADD" "s3://${ENVIRONMENT}-migrations/24Hour/restricted.txt"
       echo "skip=false" >>"$GITHUB_OUTPUT"
     fi
   fi
