@@ -51,7 +51,10 @@ jobs:
           token: ${{ secrets.CONFLICT_AUTORESOLVE }}
 
       - name: Showtime!
+        env:
+          BR_OUTPUT: ${{ needs.branch_restriction.outputs.skip }}
         id: showtime
         if: ${{ needs.branch_restriction.outputs.skip != 'false' }}
         run: |
+          echo "$BR_OUTPUT"
           echo "🚀 Running the migration script..."
