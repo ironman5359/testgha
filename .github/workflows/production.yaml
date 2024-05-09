@@ -8,8 +8,12 @@ jobs:
   branch_restriction:
     name: 🚦 Branch Restriction 🚦
     runs-on: ubuntu-latest
-    environment:
-      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'icecream' }}
+    env:
+      ENVIRONMENT: "icecream"
+      TIMEFRAME: 120
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
     outputs:
         skip: ${{ steps.check_commit_eligibility.outputs.skip }}
     steps:
