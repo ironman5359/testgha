@@ -51,6 +51,6 @@ jobs:
           
       - name: Showtime!
         id: showtime
-        if: ${{ needs.branch_restriction.outputs.skip != 'false' }}
+        if: ${{ needs.check_commit_eligibility.outputs.skip != 'false' }}
         run: |
           echo "🚀 Running the migration script..."
